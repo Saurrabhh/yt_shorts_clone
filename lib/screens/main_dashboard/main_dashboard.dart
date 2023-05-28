@@ -15,11 +15,12 @@ class MainDashboard extends StatelessWidget {
     });
     return Scaffold(
       appBar: AppBar(
-        title: Text("Posts",style: Theme.of(context).textTheme.titleLarge,)
+        title: Text("Youtube Clone",style: Theme.of(context).textTheme.titleLarge,)
       ),
       body: Consumer<PostsService>(
         builder: (BuildContext context, postsService, Widget? child) {
           return RefreshIndicator(
+            color: Colors.white,
             onRefresh:
               postsService.refreshPosts,
             child: SingleChildScrollView(

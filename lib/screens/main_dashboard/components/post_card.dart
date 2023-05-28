@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:yt_shorts_clone/screens/fullscreen_post/components/avatars.dart';
 import 'package:yt_shorts_clone/screens/fullscreen_post/fullscreen_post.dart';
 import 'package:yt_shorts_clone/services/posts_service.dart';
 import 'package:yt_shorts_clone/services/video_player_service.dart';
-import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 
 import '../../../dataclass/post.dart';
 
@@ -44,12 +44,14 @@ class PostCard extends StatelessWidget {
 
   Widget buildThumbnail() {
     return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-      child: FancyShimmerImage(
-        imageUrl: post.submission.thumbnail,
-        boxFit: BoxFit.cover,
-      ),
-    );
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+        child: Image.network(
+          post.submission.thumbnail,
+          fit: BoxFit.cover,
+          loadingBuilder: (_, child, loadingProgress) {
+            return loadingProgress == null ? child : Image.network(post.submission.placeholderUrl);
+          },
+        ));
   }
 
   Widget buildGradient() {
@@ -75,9 +77,9 @@ class PostCard extends StatelessWidget {
       right: 10,
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 15,
-            backgroundImage: NetworkImage(post.creator.pic),
+          CircularAvatar(
+            imgUrl: post.creator.pic,
+            radius: 30,
           ),
           Expanded(
             child: Padding(
@@ -98,12 +100,12 @@ class PostCard extends StatelessWidget {
     final videoPlayerService =
         Provider.of<VideoPlayerService>(context, listen: false);
 
-    videoPlayerService.initialise(
+    videoPlayerService.createVideoControllers(
         posts.sublist(
             index, index + 10 > posts.length - 1 ? posts.length : index + 10),
         index);
     Navigator.push(
             context, MaterialPageRoute(builder: (_) => const FullScreenPost()))
-        .then((value) => videoPlayerService.dispose());
+        .then((value) => videoPlayerService.clear());
   }
 }

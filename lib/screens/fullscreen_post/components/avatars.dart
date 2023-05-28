@@ -29,3 +29,26 @@ class SquareAvatar extends StatelessWidget {
     );
   }
 }
+
+class CircularAvatar extends StatelessWidget {
+  const CircularAvatar({Key? key, required this.imgUrl, required this.radius}) : super(key: key);
+  final String imgUrl;
+  final double radius;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: radius,
+      width: radius,
+      decoration: const BoxDecoration(
+          shape: BoxShape.circle
+      ),
+      child: ClipOval(
+        child: FancyShimmerImage(
+          imageUrl: imgUrl,
+          boxFit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
+

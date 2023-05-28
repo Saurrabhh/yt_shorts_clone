@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:yt_shorts_clone/dataclass/post.dart';
-import 'package:yt_shorts_clone/screens/fullscreen_post/components/square_avatar.dart';
+import 'package:yt_shorts_clone/screens/fullscreen_post/components/avatars.dart';
 import 'package:yt_shorts_clone/services/video_player_service.dart';
 
 import 'components/icon_button.dart';
@@ -27,17 +27,23 @@ class FullScreenPost extends StatelessWidget {
                   videoPlayerService.videoControllers[index];
               final post = posts[index];
               return GestureDetector(
-                onTap: () => videoController.value.isPlaying
-                    ? videoController.pause()
-                    : videoController.play(),
+                onTap: () => videoPlayerService.playPause(index),
                 onDoubleTap: () => videoPlayerService.setReaction(index),
-                onLongPress: videoController.pause,
-                onLongPressUp: videoController.play,
-                child: Stack(children: [
-                  VideoPlayer(videoController),
-                  buildGradient(),
-                  buildInfo(post, index, context)
-                ]),
+                onLongPress: () => videoPlayerService.pause(index),
+                onLongPressUp: () => videoPlayerService.play(index),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    !videoController.value.isInitialized
+                        ? const CircularProgressIndicator()
+                        : AspectRatio(
+                            aspectRatio: videoController.value.aspectRatio,
+                            child: VideoPlayer(videoController),
+                          ),
+                    buildGradient(),
+                    buildInfo(post, index, context)
+                  ],
+                ),
               );
             }),
       ),
@@ -46,7 +52,7 @@ class FullScreenPost extends StatelessWidget {
 
   Widget buildInfo(Post post, int index, BuildContext context) {
     return Positioned.fill(
-      bottom: 10,
+      bottom: 15,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: Column(
@@ -54,7 +60,7 @@ class FullScreenPost extends StatelessWidget {
             Align(
                 alignment: Alignment.topLeft,
                 child: Text(
-                  "Post",
+                  "Posts",
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
@@ -65,6 +71,7 @@ class FullScreenPost extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 buildPostData(post, context),
+                const SizedBox(width: 10),
                 buildVerticalIcons(post, index, context)
               ],
             ),
@@ -80,22 +87,24 @@ class FullScreenPost extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 15),
             child: TextDescription(
                 title: post.submission.title,
                 description: post.submission.description),
           ),
           Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage(post.creator.pic),
+              CircularAvatar(
+                imgUrl: post.creator.pic,
+                radius: 40,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  "@${post.creator.handle}",
-                  style: Theme.of(context).textTheme.bodyLarge,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    "@${post.creator.handle}",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ),
               ),
             ],
@@ -124,7 +133,8 @@ class FullScreenPost extends StatelessWidget {
         CustomIconButton(
           iconData: Icons.share,
           subtitle: "Share",
-          onPressed: () => Share.share("Here a is post by ${post.creator.handle}: ${post.submission.hyperlink}"),
+          onPressed: () => Share.share(
+              "Here a is post by ${post.creator.handle}: ${post.submission.hyperlink}"),
         ),
         SquareAvatar(imgUrl: post.creator.pic)
       ],
